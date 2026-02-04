@@ -1,11 +1,19 @@
 import { Link, useLocation } from "react-router-dom";
-import { Heart, MessageCircle, User, Menu, X } from "lucide-react";
+import { Heart, MessageCircle, User, Menu, X, LogOut } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const { user, signOut } = useAuth();
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -14,6 +22,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     { path: "/matches", label: "Matches", icon: User },
     { path: "/chat", label: "Messages", icon: MessageCircle },
   ];
+
+  const handleSignOut = async () => {
+    await signOut();
+    window.location.href = "/";
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -31,37 +44,71 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             </Link>
 
             {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center gap-1">
-              {navItems.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <Link
-                    key={item.path}
-                    to={item.path}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
-                      isActive(item.path)
-                        ? "bg-gradient-to-r from-primary/10 to-secondary/10 text-primary font-semibold"
-                        : "text-foreground hover:bg-muted"
-                    }`}
-                  >
-                    <Icon className="w-5 h-5" />
-                    <span>{item.label}</span>
-                  </Link>
-                );
-              })}
-            </nav>
+            {user && (
+              <nav className="hidden md:flex items-center gap-1">
+                {navItems.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <Link
+                      key={item.path}
+                      to={item.path}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
+                        isActive(item.path)
+                          ? "bg-gradient-to-r from-primary/10 to-secondary/10 text-primary font-semibold"
+                          : "text-foreground hover:bg-muted"
+                      }`}
+                    >
+                      <Icon className="w-5 h-5" />
+                      <span>{item.label}</span>
+                    </Link>
+                  );
+                })}
+              </nav>
+            )}
 
-            {/* Auth Buttons - Desktop */}
+            {/* Auth Buttons / User Menu - Desktop */}
             <div className="hidden md:flex items-center gap-3">
-              <Button
-                variant="outline"
-                className="border-primary text-primary hover:bg-primary/5"
-              >
-                Sign In
-              </Button>
-              <Button className="bg-gradient-to-r from-primary to-secondary hover:opacity-90">
-                Join Now
-              </Button>
+              {!user ? (
+                <>
+                  <Link to="/signin">
+                    <Button
+                      variant="outline"
+                      className="border-primary text-primary hover:bg-primary/5"
+                    >
+                      Sign In
+                    </Button>
+                  </Link>
+                  <Link to="/signup">
+                    <Button className="bg-gradient-to-r from-primary to-secondary hover:opacity-90">
+                      Join Now
+                    </Button>
+                  </Link>
+                </>
+              ) : (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="border-primary text-primary hover:bg-primary/5"
+                    >
+                      <User className="w-4 h-4 mr-2" />
+                      Account
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <div className="px-4 py-2 text-sm font-medium text-foreground border-b border-border">
+                      {user.email}
+                    </div>
+                    <DropdownMenuItem
+                      onClick={handleSignOut}
+                      className="cursor-pointer"
+                    >
+                      <LogOut className="w-4 h-4 mr-2" />
+                      Sign Out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
             </div>
 
             {/* Mobile Menu Button */}
@@ -80,35 +127,54 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           {/* Mobile Navigation */}
           {mobileMenuOpen && (
             <nav className="md:hidden mt-4 pt-4 border-t border-border space-y-2">
-              {navItems.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <Link
-                    key={item.path}
-                    to={item.path}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className={`flex items-center gap-2 px-4 py-3 rounded-lg transition-all ${
-                      isActive(item.path)
-                        ? "bg-gradient-to-r from-primary/10 to-secondary/10 text-primary font-semibold"
-                        : "text-foreground hover:bg-muted"
-                    }`}
-                  >
-                    <Icon className="w-5 h-5" />
-                    <span>{item.label}</span>
+              {user && (
+                <>
+                  {navItems.map((item) => {
+                    const Icon = item.icon;
+                    return (
+                      <Link
+                        key={item.path}
+                        to={item.path}
+                        onClick={() => setMobileMenuOpen(false)}
+                        className={`flex items-center gap-2 px-4 py-3 rounded-lg transition-all ${
+                          isActive(item.path)
+                            ? "bg-gradient-to-r from-primary/10 to-secondary/10 text-primary font-semibold"
+                            : "text-foreground hover:bg-muted"
+                        }`}
+                      >
+                        <Icon className="w-5 h-5" />
+                        <span>{item.label}</span>
+                      </Link>
+                    );
+                  })}
+                  <div className="pt-2 border-t border-border">
+                    <button
+                      onClick={handleSignOut}
+                      className="w-full flex items-center gap-2 px-4 py-3 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                    >
+                      <LogOut className="w-5 h-5" />
+                      <span>Sign Out</span>
+                    </button>
+                  </div>
+                </>
+              )}
+              {!user && (
+                <div className="pt-2 space-y-2">
+                  <Link to="/signin" onClick={() => setMobileMenuOpen(false)}>
+                    <Button
+                      variant="outline"
+                      className="w-full border-primary text-primary hover:bg-primary/5"
+                    >
+                      Sign In
+                    </Button>
                   </Link>
-                );
-              })}
-              <div className="pt-2 space-y-2">
-                <Button
-                  variant="outline"
-                  className="w-full border-primary text-primary hover:bg-primary/5"
-                >
-                  Sign In
-                </Button>
-                <Button className="w-full bg-gradient-to-r from-primary to-secondary hover:opacity-90">
-                  Join Now
-                </Button>
-              </div>
+                  <Link to="/signup" onClick={() => setMobileMenuOpen(false)}>
+                    <Button className="w-full bg-gradient-to-r from-primary to-secondary hover:opacity-90">
+                      Join Now
+                    </Button>
+                  </Link>
+                </div>
+              )}
             </nav>
           )}
         </div>
