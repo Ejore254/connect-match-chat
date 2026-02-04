@@ -12,12 +12,15 @@ import {
 import { useState, useRef, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useAuth } from "@/contexts/AuthContext";
+import { useWebSocket } from "@/hooks/useWebSocket";
 
 interface Message {
   id: string;
   sender: "user" | "other";
   content: string;
   timestamp: Date;
+  senderId?: string;
 }
 
 interface Chat {
@@ -29,7 +32,7 @@ interface Chat {
   messages: Message[];
 }
 
-const MOCK_CHATS: Chat[] = [
+const DEMO_CHATS: Chat[] = [
   {
     id: "1",
     name: "Sarah Johnson",
@@ -53,6 +56,12 @@ const MOCK_CHATS: Chat[] = [
         sender: "other",
         content: "That's awesome! What are you up to today?",
         timestamp: new Date(Date.now() - 3400000),
+      },
+      {
+        id: "4",
+        sender: "user",
+        content: "Just working on some projects. How about you?",
+        timestamp: new Date(Date.now() - 3300000),
       },
     ],
   },
@@ -89,15 +98,42 @@ const MOCK_CHATS: Chat[] = [
         content: "I love hiking! We should go sometime",
         timestamp: new Date(Date.now() - 7200000),
       },
+      {
+        id: "2",
+        sender: "user",
+        content: "That sounds amazing! I'd love to! 🥾",
+        timestamp: new Date(Date.now() - 7100000),
+      },
     ],
   },
 ];
 
 export default function Chat() {
-  const [selectedChat, setSelectedChat] = useState<Chat>(MOCK_CHATS[0]);
+  const { user } = useAuth();
+  const [selectedChat, setSelectedChat] = useState<Chat>(DEMO_CHATS[0]);
   const [messageInput, setMessageInput] = useState("");
   const [messages, setMessages] = useState<Message[]>(selectedChat.messages);
+  const [chats, setChats] = useState<Chat[]>(DEMO_CHATS);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // WebSocket connection
+  const { connected, subscribe, send } = useWebSocket("/api/chat", !!user);
+
+  useEffect(() => {
+    // Subscribe to incoming messages
+    const unsubscribe = subscribe("message", (payload) => {
+      const newMessage: Message = {
+        id: Date.now().toString(),
+        sender: "other",
+        content: payload.content,
+        timestamp: new Date(),
+        senderId: payload.senderId,
+      };
+      setMessages((prev) => [...prev, newMessage]);
+    });
+
+    return unsubscribe;
+  }, [subscribe]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -118,11 +154,42 @@ export default function Chat() {
         sender: "user",
         content: messageInput,
         timestamp: new Date(),
+        senderId: user?.id,
       };
-      setMessages([...messages, newMessage]);
+
+      setMessages((prev) => [...prev, newMessage]);
+
+      // Send via WebSocket if connected, otherwise just add to local state
+      if (connected) {
+        send("message", {
+          content: messageInput,
+          recipientId: selectedChat.id,
+          senderId: user?.id,
+        });
+      }
+
       setMessageInput("");
+
+      // Update last message in chat list
+      setChats((prev) =>
+        prev.map((chat) =>
+          chat.id === selectedChat.id
+            ? { ...chat, messages: [...chat.messages, newMessage] }
+            : chat
+        )
+      );
     }
   };
+
+  if (!user) {
+    return (
+      <Layout>
+        <div className="min-h-[calc(100vh-80px)] flex items-center justify-center">
+          <p className="text-muted-foreground">Please sign in to view messages.</p>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
@@ -140,7 +207,7 @@ export default function Chat() {
 
           {/* Chat List */}
           <div className="flex-1 overflow-y-auto">
-            {MOCK_CHATS.map((chat) => (
+            {chats.map((chat) => (
               <button
                 key={chat.id}
                 onClick={() => {
@@ -172,6 +239,21 @@ export default function Chat() {
                 </div>
               </button>
             ))}
+          </div>
+
+          {/* Connection Status */}
+          <div className="p-4 border-t border-border text-xs text-muted-foreground text-center">
+            {connected ? (
+              <span className="inline-flex items-center gap-1">
+                <span className="w-2 h-2 bg-green-500 rounded-full" />
+                Connected
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1">
+                <span className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse" />
+                Connecting...
+              </span>
+            )}
           </div>
         </div>
 
@@ -291,7 +373,8 @@ export default function Chat() {
               </Button>
               <Button
                 onClick={handleSendMessage}
-                className="h-10 w-10 rounded-full bg-gradient-to-r from-primary to-secondary hover:opacity-90 flex-shrink-0 p-0 flex items-center justify-center"
+                disabled={!messageInput.trim()}
+                className="h-10 w-10 rounded-full bg-gradient-to-r from-primary to-secondary hover:opacity-90 disabled:opacity-50 flex-shrink-0 p-0 flex items-center justify-center"
               >
                 <Send className="w-5 h-5" />
               </Button>
