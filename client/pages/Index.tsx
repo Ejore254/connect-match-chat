@@ -1,7 +1,9 @@
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Heart, Zap, Shield, Users, MessageCircle, Sparkles } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { useEffect } from "react";
 
 const Feature = ({
   icon: Icon,
@@ -24,6 +26,15 @@ const Feature = ({
 );
 
 export default function Index() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user) {
+      navigate("/chat");
+    }
+  }, [user, navigate]);
+
   return (
     <Layout>
       {/* Hero Section */}
@@ -58,7 +69,7 @@ export default function Index() {
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-              <Link to="/chat">
+              <Link to="/signup">
                 <Button className="h-14 px-8 text-base bg-gradient-to-r from-primary to-secondary hover:opacity-90 rounded-full w-full sm:w-auto">
                   Start Matching Now
                   <Heart className="ml-2 w-5 h-5" />
@@ -201,7 +212,7 @@ export default function Index() {
               Join MeetHeart today and start your journey to finding meaningful
               connections.
             </p>
-            <Link to="/chat">
+            <Link to="/signup">
               <Button className="h-14 px-10 text-base bg-gradient-to-r from-primary to-secondary hover:opacity-90 rounded-full">
                 Get Started Free
                 <Heart className="ml-2 w-5 h-5" />
