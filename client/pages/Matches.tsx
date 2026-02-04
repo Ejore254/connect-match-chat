@@ -1,7 +1,20 @@
 import Layout from "@/components/Layout";
 import { Heart } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function Matches() {
+  const { user } = useAuth();
+
+  if (!user) {
+    return (
+      <Layout>
+        <div className="min-h-[calc(100vh-80px)] flex items-center justify-center">
+          <p className="text-muted-foreground">Please sign in to view matches.</p>
+        </div>
+      </Layout>
+    );
+  }
+
   return (
     <Layout>
       <div className="min-h-[calc(100vh-80px)] flex items-center justify-center bg-gradient-to-br from-white to-muted/30">
@@ -13,8 +26,10 @@ export default function Matches() {
             Your Matches
           </h1>
           <p className="text-muted-foreground max-w-md">
-            This page will show all your matches. Keep using the app and let us
-            know when you'd like us to build out this feature!
+            You currently have no matches. Keep exploring and liking profiles to find your perfect match!
+          </p>
+          <p className="text-xs text-muted-foreground mt-4">
+            This feature is coming soon. Let us know if you'd like us to prioritize it!
           </p>
         </div>
       </div>
