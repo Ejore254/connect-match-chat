@@ -25,6 +25,7 @@ MeetHeart is a beautiful, modern dating application where singles can discover c
 ### Installation & Running
 
 1. **Clone and Install**
+
 ```bash
 git clone <your-repo-url>
 cd meetheart
@@ -32,6 +33,7 @@ pnpm install
 ```
 
 2. **Run Locally**
+
 ```bash
 pnpm dev
 ```
@@ -83,11 +85,13 @@ meetheart/
 ### Current Setup (Demo/Local)
 
 The app uses **local storage-based authentication** by default:
+
 - Sign up creates an account stored in browser localStorage
 - Demo credentials included for immediate testing
 - Perfect for development and testing
 
 ### Demo Credentials
+
 ```
 Email: demo@meetheart.com
 Password: demo123456
@@ -104,6 +108,7 @@ To add real authentication with Supabase:
 
 2. **Set Environment Variables**
    Create `.env.local`:
+
    ```env
    VITE_SUPABASE_URL=https://your-project.supabase.co
    VITE_SUPABASE_ANON_KEY=your-anon-key
@@ -111,6 +116,7 @@ To add real authentication with Supabase:
 
 3. **Create Database Tables**
    In Supabase dashboard, create:
+
    ```sql
    -- Users/Profiles table
    CREATE TABLE profiles (
@@ -161,6 +167,7 @@ To add real authentication with Supabase:
 ### WebSocket Endpoints
 
 The app expects WebSocket server at `/api/chat`:
+
 ```javascript
 // Client automatically connects to:
 // http://localhost:8080 (development)
@@ -170,17 +177,18 @@ The app expects WebSocket server at `/api/chat`:
 ### Implementing WebSocket Server
 
 Create `server/websocket.ts`:
+
 ```typescript
-import { WebSocketServer } from 'ws';
-import { createServer } from 'http';
+import { WebSocketServer } from "ws";
+import { createServer } from "http";
 
 const server = createServer();
 const wss = new WebSocketServer({ server });
 
-wss.on('connection', (ws) => {
-  console.log('Client connected');
-  
-  ws.on('message', (data) => {
+wss.on("connection", (ws) => {
+  console.log("Client connected");
+
+  ws.on("message", (data) => {
     const message = JSON.parse(data);
     // Broadcast to other clients
     wss.clients.forEach((client) => {
@@ -189,9 +197,9 @@ wss.on('connection', (ws) => {
       }
     });
   });
-  
-  ws.on('close', () => {
-    console.log('Client disconnected');
+
+  ws.on("close", () => {
+    console.log("Client disconnected");
   });
 });
 
@@ -201,15 +209,18 @@ server.listen(8080);
 ## 🎨 Design System
 
 ### Colors
+
 - **Primary**: Deep pink (#EF4444 - HSL 335 85% 55%)
 - **Secondary**: Purple (#B24BF3 - HSL 280 80% 55%)
 - **Accent**: Orange (#FF9147 - HSL 15 86% 57%)
 
 ### Typography
+
 - Font: Inter (Google Fonts)
 - Sizes: Responsive with Tailwind CSS utilities
 
 ### Components
+
 - Built with Radix UI for accessibility
 - Tailwind CSS for styling
 - Lucide React for icons
@@ -264,6 +275,7 @@ pnpm format.fix
 **Recommended**: Easiest deployment option
 
 1. **Push to GitHub**
+
    ```bash
    git push origin main
    ```
@@ -314,6 +326,7 @@ VITE_API_URL=https://your-domain.com
 ## 📝 Pages Overview
 
 ### Homepage (`/`)
+
 - Hero section with call-to-action
 - Features showcase
 - How it works explanation
@@ -321,6 +334,7 @@ VITE_API_URL=https://your-domain.com
 - Auto-redirects to chat if logged in
 
 ### Sign Up (`/signup`)
+
 - Create new account
 - Profile information
 - Bio and preferences
@@ -328,6 +342,7 @@ VITE_API_URL=https://your-domain.com
 - Link to sign in
 
 ### Sign In (`/signin`)
+
 - Email and password login
 - Demo credentials displayed
 - Forgot password link (ready)
@@ -335,6 +350,7 @@ VITE_API_URL=https://your-domain.com
 - Remember me (ready)
 
 ### Chat (`/chat`)
+
 - Real-time messaging with WebSocket
 - Chat list with all matches
 - Active chat window
@@ -345,6 +361,7 @@ VITE_API_URL=https://your-domain.com
 - Send button with validation
 
 ### Matches (`/matches`)
+
 - Shows current matches
 - Placeholder for features
 - Encourages exploration
@@ -352,12 +369,14 @@ VITE_API_URL=https://your-domain.com
 ## 🔒 Security
 
 Current implementation:
+
 - Client-side form validation
 - Secure password handling in localStorage (demo only)
 - XSS protection via React
 - CORS configured
 
 For production with Supabase:
+
 - JWT-based authentication
 - Row-level security policies
 - Encrypted connections
@@ -403,6 +422,7 @@ Password: test123456
 ## 🌙 Dark Mode
 
 Built-in dark mode support:
+
 - Toggle in browser DevTools (Inspector → :hov → toggle dark mode)
 - Colors automatically adjust
 - Uses CSS variables in `client/global.css`
@@ -419,12 +439,14 @@ Built-in dark mode support:
 ## 🛣️ Roadmap
 
 ### MVP (Current)
+
 - ✅ Authentication
 - ✅ Chat interface
 - ✅ Real-time messaging
 - ✅ Responsive design
 
 ### Phase 2
+
 - [ ] User discovery/swiping
 - [ ] Matching algorithm
 - [ ] Notifications
@@ -432,6 +454,7 @@ Built-in dark mode support:
 - [ ] Video calls
 
 ### Phase 3
+
 - [ ] Advanced filters
 - [ ] Premium features
 - [ ] Analytics
@@ -451,6 +474,7 @@ MIT License - see LICENSE file for details
 ## 💬 Support
 
 Need help?
+
 - Check the [Builder.io Docs](https://www.builder.io/c/docs)
 - Review [React Documentation](https://react.dev)
 - Check [Tailwind Docs](https://tailwindcss.com/docs)

@@ -94,10 +94,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await new Promise((resolve) => setTimeout(resolve, 500));
 
       // Check demo credentials
-      if (
-        email === DEMO_USER.email &&
-        password === DEMO_USER.password
-      ) {
+      if (email === DEMO_USER.email && password === DEMO_USER.password) {
         const demoUserObj: AuthUser = {
           id: "demo_user_123",
           email: DEMO_USER.email,
@@ -124,7 +121,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       throw new Error("Invalid email or password");
     } catch (error: any) {
-      throw new Error(error.message || "Failed to sign in. Please check your credentials.");
+      throw new Error(
+        error.message || "Failed to sign in. Please check your credentials.",
+      );
     } finally {
       setLoading(false);
     }

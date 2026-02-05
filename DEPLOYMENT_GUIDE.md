@@ -31,6 +31,7 @@ Your code is ready to push. Use the UI button in Builder.io to push to GitHub:
 ### Step 4: Configure (Optional)
 
 **Build Settings:**
+
 - Build Command: `pnpm build`
 - Output Directory: `dist/spa`
 - Install Command: `pnpm install`
@@ -38,6 +39,7 @@ Your code is ready to push. Use the UI button in Builder.io to push to GitHub:
 These are already set in `vercel.json` - Vercel will use them automatically.
 
 **Environment Variables** (Only if using Supabase):
+
 - Go to **Settings → Environment Variables**
 - Add `VITE_SUPABASE_URL` = your Supabase URL
 - Add `VITE_SUPABASE_ANON_KEY` = your Supabase anon key
@@ -51,11 +53,13 @@ These are already set in `vercel.json` - Vercel will use them automatically.
 ## 🔗 After Deployment
 
 Your app is now live at:
+
 ```
 https://your-project-name.vercel.app
 ```
 
 ### Features That Work:
+
 - ✅ All pages load correctly
 - ✅ No 404 errors on page refresh
 - ✅ Sign up and sign in work
@@ -65,6 +69,7 @@ https://your-project-name.vercel.app
 - ✅ Dark mode works
 
 ### What Happens on Every Push:
+
 - Every time you push to `main` branch
 - Vercel automatically rebuilds and deploys
 - New URL is live within 2-3 minutes
@@ -107,19 +112,23 @@ After deployment, test these:
 ## ❌ Troubleshooting
 
 ### 404 Errors on Page Refresh
+
 **Solution**: Already fixed with `vercel.json` rewrites!
 
 ### Build Fails
+
 1. Check build command: `pnpm build`
 2. Run locally: `pnpm build` should work
 3. Check node version in Vercel (should be 18+)
 
 ### Chat Not Working
+
 - App uses local storage by default
 - Messages persist in browser
 - For real-time: Connect Supabase and set env variables
 
 ### Slow Builds
+
 - Vercel caches dependencies
 - Rebuilds after dependency changes
 - Standard Vercel plan handles this fine
@@ -127,6 +136,7 @@ After deployment, test these:
 ## 📊 Vercel Analytics
 
 After deployment, check:
+
 1. **Deployments** tab - see all builds
 2. **Analytics** tab - see page views and performance
 3. **Settings** - configure custom domains
@@ -153,25 +163,32 @@ Example: `yourdomain.com` instead of `meetheart.vercel.app`
 ## 💡 Pro Tips
 
 ### Tip 1: Preview Deployments
+
 Every push creates a preview deployment:
+
 - Vercel gives you preview URL
 - Test changes before going to production
 - Perfect for testing with team
 
 ### Tip 2: Rollback
+
 If something breaks:
+
 1. Go to **Deployments** tab
 2. Find previous working deployment
 3. Click **"..."** → **"Promote to Production"**
 4. Live immediately!
 
 ### Tip 3: Monitor Performance
+
 - Vercel Analytics shows real user metrics
 - Web Vitals tell you if site is fast
 - Aim for green scores
 
 ### Tip 4: Environment-Specific Config
+
 Use different env variables for:
+
 - Production (Vercel)
 - Preview (Vercel preview)
 - Local development (.env.local)
@@ -181,6 +198,7 @@ Use different env variables for:
 **Vercel Documentation**: https://vercel.com/docs
 
 **Issues to Check**:
+
 1. Is code pushed to GitHub? ✓
 2. Is repository public or private? (Vercel can see it)
 3. Are environment variables set? (if using Supabase)
