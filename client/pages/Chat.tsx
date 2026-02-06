@@ -32,7 +32,8 @@ interface DisplayMessage {
 
 export default function Chat() {
   const { user } = useAuth();
-  const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
+  const [selectedConversation, setSelectedConversation] =
+    useState<Conversation | null>(null);
   const [selectedUser, setSelectedUser] = useState<ChatUser | null>(null);
   const [messageInput, setMessageInput] = useState("");
   const [messages, setMessages] = useState<DisplayMessage[]>([]);
@@ -47,7 +48,7 @@ export default function Chat() {
 
     // Get all other users (for demo, create some if they don't exist)
     let allUsers = db.getUsers().filter((u) => u.id !== user.id);
-    
+
     // If not enough users, create demo users
     if (allUsers.length === 0) {
       const demoUsers = [
@@ -108,7 +109,7 @@ export default function Chat() {
     // Auto-select first conversation or create one
     if (userConversations.length > 0) {
       setSelectedConversation(userConversations[0]);
-      const otherUserId = 
+      const otherUserId =
         userConversations[0].user1Id === user.id
           ? userConversations[0].user2Id
           : userConversations[0].user1Id;
@@ -249,7 +250,9 @@ export default function Chat() {
     return (
       <Layout>
         <div className="min-h-[calc(100vh-80px)] flex items-center justify-center">
-          <p className="text-muted-foreground">Please sign in to view messages.</p>
+          <p className="text-muted-foreground">
+            Please sign in to view messages.
+          </p>
         </div>
       </Layout>
     );
@@ -299,7 +302,9 @@ export default function Chat() {
                     <AvatarFallback>{chatUser.name.charAt(0)}</AvatarFallback>
                   </Avatar>
                   <div className="flex-1 min-w-0 text-left">
-                    <p className="text-xs font-medium truncate">{chatUser.name}</p>
+                    <p className="text-xs font-medium truncate">
+                      {chatUser.name}
+                    </p>
                     <p className="text-xs text-muted-foreground">
                       {chatUser.status === "online" ? "Online" : "Offline"}
                     </p>
@@ -363,7 +368,10 @@ export default function Chat() {
             <div className="p-4 border-b border-border flex items-center justify-between bg-card">
               <div className="flex items-center gap-3">
                 <Avatar className="h-10 w-10">
-                  <AvatarImage src={selectedUser.avatar} alt={selectedUser.name} />
+                  <AvatarImage
+                    src={selectedUser.avatar}
+                    alt={selectedUser.name}
+                  />
                   <AvatarFallback>{selectedUser.name.charAt(0)}</AvatarFallback>
                 </Avatar>
                 {selectedUser.status === "online" && (
@@ -374,9 +382,7 @@ export default function Chat() {
                     {selectedUser.name}
                   </h3>
                   <p className="text-sm text-muted-foreground">
-                    {selectedUser.status === "online"
-                      ? "Online"
-                      : "Offline"}
+                    {selectedUser.status === "online" ? "Online" : "Offline"}
                   </p>
                 </div>
               </div>
@@ -419,7 +425,9 @@ export default function Chat() {
                   <div
                     key={message.id}
                     className={`flex ${
-                      message.sender === "user" ? "justify-end" : "justify-start"
+                      message.sender === "user"
+                        ? "justify-end"
+                        : "justify-start"
                     }`}
                   >
                     <div

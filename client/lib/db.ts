@@ -78,7 +78,10 @@ class Database {
     } else {
       conversations.push(conversation);
     }
-    localStorage.setItem(this.prefix + "conversations", JSON.stringify(conversations));
+    localStorage.setItem(
+      this.prefix + "conversations",
+      JSON.stringify(conversations),
+    );
     return conversation;
   }
 
@@ -94,7 +97,7 @@ class Database {
     let conversation = conversations.find(
       (c) =>
         (c.user1Id === id1 && c.user2Id === id2) ||
-        (c.user1Id === id2 && c.user2Id === id1)
+        (c.user1Id === id2 && c.user2Id === id1),
     );
 
     if (!conversation) {
@@ -114,7 +117,7 @@ class Database {
   getConversationsForUser(userId: string): Conversation[] {
     const conversations = this.getConversations();
     return conversations.filter(
-      (c) => c.user1Id === userId || c.user2Id === userId
+      (c) => c.user1Id === userId || c.user2Id === userId,
     );
   }
 
@@ -139,7 +142,10 @@ class Database {
     const messages = this.getMessages();
     return messages
       .filter((m) => m.conversationId === conversationId)
-      .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+      .sort(
+        (a, b) =>
+          new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
+      );
   }
 
   getMessages(): Message[] {
@@ -174,7 +180,7 @@ class Database {
         u.name.toLowerCase().includes(q) ||
         u.email.toLowerCase().includes(q) ||
         u.location.toLowerCase().includes(q) ||
-        u.bio.toLowerCase().includes(q)
+        u.bio.toLowerCase().includes(q),
     );
   }
 

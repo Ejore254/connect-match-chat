@@ -77,7 +77,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // Save to database
       db.saveUser(newUser);
-      
+
       // Store password (hashed in production!)
       localStorage.setItem(`meetheart_pwd_${newUser.id}`, btoa(password));
       localStorage.setItem("meetheart_currentUserId", newUser.id);
@@ -115,7 +115,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       // Verify password
-      const storedPassword = localStorage.getItem(`meetheart_pwd_${foundUser.id}`);
+      const storedPassword = localStorage.getItem(
+        `meetheart_pwd_${foundUser.id}`,
+      );
       if (!storedPassword || atob(storedPassword) !== password) {
         throw new Error("Invalid password");
       }
