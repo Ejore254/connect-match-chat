@@ -1,15 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
+import { db, User } from "@/lib/db";
 
-export type AuthUser = {
-  id: string;
-  email: string;
-  name: string;
-  age: number;
-  gender: string;
-  lookingFor: string;
-  location: string;
-  bio: string;
-};
+export type AuthUser = User;
 
 type AuthContextType = {
   user: AuthUser | null;
@@ -21,31 +13,33 @@ type AuthContextType = {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Demo credentials
-const DEMO_USER = {
+// Demo user - pre-loaded for testing
+const createDemoUser = (): User => ({
+  id: "demo_user_123",
   email: "demo@meetheart.com",
-  password: "demo123456",
-  profile: {
-    name: "Alex Johnson",
-    age: 28,
-    gender: "male",
-    lookingFor: "female",
-    location: "New York, NY",
-    bio: "Adventure seeker and coffee enthusiast. Love hiking and exploring new places!",
-  },
-};
+  name: "Alex Johnson",
+  age: 28,
+  gender: "male",
+  lookingFor: "female",
+  location: "New York, NY",
+  bio: "Adventure seeker and coffee enthusiast. Love hiking and exploring new places!",
+  createdAt: new Date().toISOString(),
+});
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user is logged in on mount (from localStorage)
+    // Check if user is logged in on mount
     const checkAuth = async () => {
       try {
-        const savedUser = localStorage.getItem("meetHeart_user");
-        if (savedUser) {
-          setUser(JSON.parse(savedUser));
+        const currentUserId = localStorage.getItem("meetheart_currentUserId");
+        if (currentUserId) {
+          const savedUser = db.getUser(currentUserId);
+          if (savedUser) {
+            setUser(savedUser);
+          }
         }
       } catch (error) {
         console.error("Failed to restore auth:", error);
@@ -60,24 +54,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signUp = async (email: string, password: string, profile: any) => {
     setLoading(true);
     try {
-      // Simulate API delay
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      // Simulate network delay
+      await new Promise((resolve) => setTimeout(resolve, 800));
 
-      // Create user object
-      const newUser: AuthUser = {
+      // Check if email already exists
+      if (db.getUserByEmail(email)) {
+        throw new Error("Email already registered");
+      }
+
+      // Create new user
+      const newUser: User = {
         id: `user_${Date.now()}`,
         email,
         name: profile.name,
-        age: profile.age,
+        age: parseInt(profile.age),
         gender: profile.gender,
         lookingFor: profile.looking_for || profile.lookingFor,
         location: profile.location,
-        bio: profile.bio,
+        bio: profile.bio || "",
+        createdAt: new Date().toISOString(),
       };
 
-      // Store in localStorage
-      localStorage.setItem("meetHeart_user", JSON.stringify(newUser));
-      localStorage.setItem("meetHeart_password", password); // Note: This is for demo only - never do this in production!
+      // Save to database
+      db.saveUser(newUser);
+      
+      // Store password (hashed in production!)
+      localStorage.setItem(`meetheart_pwd_${newUser.id}`, btoa(password));
+      localStorage.setItem("meetheart_currentUserId", newUser.id);
 
       setUser(newUser);
     } catch (error: any) {
@@ -90,40 +93,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signIn = async (email: string, password: string) => {
     setLoading(true);
     try {
-      // Simulate API delay
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      // Simulate network delay
+      await new Promise((resolve) => setTimeout(resolve, 800));
 
       // Check demo credentials
-      if (email === DEMO_USER.email && password === DEMO_USER.password) {
-        const demoUserObj: AuthUser = {
-          id: "demo_user_123",
-          email: DEMO_USER.email,
-          ...DEMO_USER.profile,
-        };
-        localStorage.setItem("meetHeart_user", JSON.stringify(demoUserObj));
-        localStorage.setItem("meetHeart_password", password);
-        setUser(demoUserObj);
+      if (email === "demo@meetheart.com" && password === "demo123456") {
+        let demoUser = db.getUser("demo_user_123");
+        if (!demoUser) {
+          demoUser = createDemoUser();
+          db.saveUser(demoUser);
+        }
+        localStorage.setItem("meetheart_currentUserId", demoUser.id);
+        setUser(demoUser);
         return;
       }
 
-      // Check user-created accounts
-      const savedUser = localStorage.getItem("meetHeart_user");
-      const savedPassword = localStorage.getItem("meetHeart_password");
-
-      if (
-        savedUser &&
-        JSON.parse(savedUser).email === email &&
-        savedPassword === password
-      ) {
-        setUser(JSON.parse(savedUser));
-        return;
+      // Find user in database
+      const foundUser = db.getUserByEmail(email);
+      if (!foundUser) {
+        throw new Error("User not found");
       }
 
-      throw new Error("Invalid email or password");
+      // Verify password
+      const storedPassword = localStorage.getItem(`meetheart_pwd_${foundUser.id}`);
+      if (!storedPassword || atob(storedPassword) !== password) {
+        throw new Error("Invalid password");
+      }
+
+      localStorage.setItem("meetheart_currentUserId", foundUser.id);
+      setUser(foundUser);
     } catch (error: any) {
-      throw new Error(
-        error.message || "Failed to sign in. Please check your credentials.",
-      );
+      throw new Error(error.message || "Failed to sign in.");
     } finally {
       setLoading(false);
     }
@@ -132,8 +132,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signOut = async () => {
     setLoading(true);
     try {
-      localStorage.removeItem("meetHeart_user");
-      localStorage.removeItem("meetHeart_password");
+      localStorage.removeItem("meetheart_currentUserId");
       setUser(null);
     } catch (error) {
       throw new Error("Failed to sign out");
