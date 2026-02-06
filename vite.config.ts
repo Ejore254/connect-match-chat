@@ -3,47 +3,47 @@ import react from "@vitejs/plugin-react-swc";
 import path from "path";
 
 // https://vitejs.dev/config/
-export default defineConfig(({ command }) => {
-  const plugins = [react()];
+export default defineConfig((env) => ({
+  server: {
+    host: "::",
+    port: 8080,
+    fs: {
+      allow: ["./client", "./shared"],
+      deny: [".env", ".env.*", "*.{crt,pem}", "**/.git/**", "server/**"],
+    },
+  },
+  build: {
+    outDir: "dist",
+    minify: "terser",
+    emptyOutDir: true,
+  },
+  plugins: [
+    react(),
+    ...(env.command === "serve" ? [expressDevPlugin()] : []),
+  ],
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./client"),
+      "@shared": path.resolve(__dirname, "./shared"),
+    },
+  },
+}));
 
-  // Only load express plugin during development
-  if (command === "serve") {
-    plugins.push(expressPlugin());
-  }
-
+function expressDevPlugin(): Plugin {
+  let serverCreated = false;
   return {
-    server: {
-      host: "::",
-      port: 8080,
-      fs: {
-        allow: ["./client", "./shared"],
-        deny: [".env", ".env.*", "*.{crt,pem}", "**/.git/**", "server/**"],
-      },
-    },
-    build: {
-      outDir: "dist",
-      target: "esnext",
-    },
-    plugins,
-    resolve: {
-      alias: {
-        "@": path.resolve(__dirname, "./client"),
-        "@shared": path.resolve(__dirname, "./shared"),
-      },
-    },
-  };
-});
-
-function expressPlugin(): Plugin {
-  return {
-    name: "express-plugin",
-    apply: "serve", // Only apply during development (serve mode)
+    name: "express-dev-plugin",
+    apply: "serve",
     configureServer(server) {
-      // Lazy load to avoid issues during build
-      Promise.resolve().then(async () => {
-        const { createServer } = await import("./server");
+      if (serverCreated) return;
+      serverCreated = true;
+
+      // Dynamic import to avoid breaking the build
+      import("./server").then(({ createServer }) => {
         const app = createServer();
         server.middlewares.use(app);
+      }).catch((err) => {
+        console.warn("Failed to load express server for dev:", err);
       });
     },
   };
