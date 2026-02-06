@@ -8,8 +8,7 @@ export default defineConfig(({ command }) => {
 
   // Only load express plugin during development
   if (command === "serve") {
-    const { createServer } = require("./server");
-    plugins.push(expressPlugin(createServer));
+    plugins.push(expressPlugin());
   }
 
   return {
@@ -35,11 +34,12 @@ export default defineConfig(({ command }) => {
   };
 });
 
-function expressPlugin(createServer: any): Plugin {
+function expressPlugin(): Plugin {
   return {
     name: "express-plugin",
     apply: "serve", // Only apply during development (serve mode)
-    configureServer(server) {
+    async configureServer(server) {
+      const { createServer } = await import("./server");
       const app = createServer();
 
       // Add Express app as middleware to Vite dev server
