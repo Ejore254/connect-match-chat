@@ -12,7 +12,6 @@ export default defineConfig(({ command }) => {
   }
 
   return {
-    root: ".",
     server: {
       host: "::",
       port: 8080,
@@ -23,6 +22,7 @@ export default defineConfig(({ command }) => {
     },
     build: {
       outDir: "dist",
+      target: "esnext",
     },
     plugins,
     resolve: {
@@ -38,12 +38,13 @@ function expressPlugin(): Plugin {
   return {
     name: "express-plugin",
     apply: "serve", // Only apply during development (serve mode)
-    async configureServer(server) {
-      const { createServer } = await import("./server");
-      const app = createServer();
-
-      // Add Express app as middleware to Vite dev server
-      server.middlewares.use(app);
+    configureServer(server) {
+      // Lazy load to avoid issues during build
+      Promise.resolve().then(async () => {
+        const { createServer } = await import("./server");
+        const app = createServer();
+        server.middlewares.use(app);
+      });
     },
   };
 }
