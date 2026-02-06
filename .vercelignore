@@ -6,9 +6,6 @@ PRODUCTION_READY.md
 VERCEL_DEPLOY_STEPS.md
 .env.local
 .env.*.local
-node_modules
-dist
 coverage
 .DS_Store
 *.log
-pnpm-lock.yaml
