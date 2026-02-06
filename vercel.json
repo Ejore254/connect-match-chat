@@ -2,7 +2,7 @@
   "version": 2,
   "buildCommand": "pnpm install && pnpm run build:client",
   "framework": "vite",
-  "outputDirectory": "dist/spa",
+  "outputDirectory": "dist",
   "installCommand": "pnpm install --frozen-lockfile",
   "env": {
     "VITE_SUPABASE_URL": "@vite_supabase_url",
