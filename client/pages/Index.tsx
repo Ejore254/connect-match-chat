@@ -35,6 +35,14 @@ export default function Index() {
     }
   }, [user, navigate]);
 
+  const handleLearnMore = () => {
+    // Scroll to features section
+    const featuresSection = document.getElementById("features");
+    if (featuresSection) {
+      featuresSection.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
   return (
     <Layout>
       {/* Hero Section */}
@@ -76,6 +84,7 @@ export default function Index() {
                 </Button>
               </Link>
               <Button
+                onClick={handleLearnMore}
                 variant="outline"
                 className="h-14 px-8 text-base border-primary text-primary hover:bg-primary/5 rounded-full w-full sm:w-auto"
               >
@@ -105,7 +114,7 @@ export default function Index() {
       </section>
 
       {/* Features Section */}
-      <section className="py-20 md:py-32 bg-background">
+      <section id="features" className="py-20 md:py-32 bg-background">
         <div className="container mx-auto px-4">
           <div className="text-center space-y-4 mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-foreground">
